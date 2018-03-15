@@ -21,9 +21,9 @@ class ActionColumn extends \yii\grid\ActionColumn
      */
     protected function getHeaderCellLabel()
     {
-        return 'Show: '.Html::dropDownList('pagesize', 10,
+        return 'Show: '.Html::dropDownList('pageSize', 10,
             [10 => 10, 20 => 20, 50 => 50, 100 => 100, 1000 => 1000],
-            ['id' => 'pagesize','class'=>'form-control']
+            ['id' => 'pageSize','class'=>'form-control']
         );
     }
 

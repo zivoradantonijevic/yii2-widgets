@@ -117,7 +117,7 @@ class UploadImageBehavior extends UploadBehavior
     }
 
     /**
-     * @throws \yii\base\InvalidParamException
+     * @throws \yii\base\Exception
      */
     protected function createThumbs()
     {
@@ -156,6 +156,7 @@ class UploadImageBehavior extends UploadBehavior
      * @param string $attribute
      * @param string $profile
      * @return string|null
+     * @throws \yii\base\Exception
      */
     public function getThumbUploadUrl($attribute, $profile = 'thumb')
     {

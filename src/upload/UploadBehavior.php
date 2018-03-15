@@ -113,11 +113,11 @@ class UploadBehavior extends Behavior
     {
         return [
             BaseActiveRecord::EVENT_BEFORE_VALIDATE => 'beforeValidate',
-            BaseActiveRecord::EVENT_BEFORE_INSERT   => 'beforeSave',
-            BaseActiveRecord::EVENT_BEFORE_UPDATE   => 'beforeSave',
-            BaseActiveRecord::EVENT_AFTER_INSERT    => 'afterSave',
-            BaseActiveRecord::EVENT_AFTER_UPDATE    => 'afterSave',
-            BaseActiveRecord::EVENT_AFTER_DELETE    => 'afterDelete',
+            BaseActiveRecord::EVENT_BEFORE_INSERT => 'beforeSave',
+            BaseActiveRecord::EVENT_BEFORE_UPDATE => 'beforeSave',
+            BaseActiveRecord::EVENT_AFTER_INSERT => 'afterSave',
+            BaseActiveRecord::EVENT_AFTER_UPDATE => 'afterSave',
+            BaseActiveRecord::EVENT_AFTER_DELETE => 'afterDelete',
         ];
     }
 
@@ -154,7 +154,7 @@ class UploadBehavior extends Behavior
         $model = $this->owner;
         if (in_array($model->scenario, $this->scenarios)) {
             if ($this->_file instanceof UploadedFile) {
-                if ( ! $model->getIsNewRecord() && $model->isAttributeChanged($this->attribute)) {
+                if (!$model->getIsNewRecord() && $model->isAttributeChanged($this->attribute)) {
                     if ($this->unlinkOnSave === true) {
                         $this->delete($this->attribute, true);
                     }
@@ -165,7 +165,7 @@ class UploadBehavior extends Behavior
                 unset($model->{$this->attribute});
             }
         } else {
-            if ( ! $model->getIsNewRecord() && $model->isAttributeChanged($this->attribute)) {
+            if (!$model->getIsNewRecord() && $model->isAttributeChanged($this->attribute)) {
                 if ($this->unlinkOnSave === true) {
                     $this->delete($this->attribute, true);
                 }
@@ -176,7 +176,7 @@ class UploadBehavior extends Behavior
     /**
      * This method is called at the end of inserting or updating a record.
      *
-     * @throws \yii\base\InvalidParamException
+     * @throws \yii\base\Exception
      */
     public function afterSave()
     {
@@ -205,7 +205,7 @@ class UploadBehavior extends Behavior
     /**
      * Returns file path for the attribute.
      *
-     * @param string  $attribute
+     * @param string $attribute
      * @param boolean $old
      *
      * @return string|null the file path.
@@ -213,8 +213,8 @@ class UploadBehavior extends Behavior
     public function getUploadPath($attribute, $old = false)
     {
         /** @var BaseActiveRecord $model */
-        $model    = $this->owner;
-        $path     = $this->resolvePath($this->path);
+        $model = $this->owner;
+        $path = $this->resolvePath($this->path);
         $fileName = ($old === true) ? $model->getOldAttribute($attribute) : $model->$attribute;
 
         return $fileName ? Yii::getAlias($path . '/' . $fileName) : null;
@@ -230,8 +230,8 @@ class UploadBehavior extends Behavior
     public function getUploadUrl($attribute)
     {
         /** @var BaseActiveRecord $model */
-        $model    = $this->owner;
-        $url      = $this->resolvePath($this->url);
+        $model = $this->owner;
+        $url = $this->resolvePath($this->url);
         $fileName = $model->getOldAttribute($attribute);
 
         return $fileName ? Yii::getAlias($url . '/' . $fileName) : null;
@@ -249,6 +249,8 @@ class UploadBehavior extends Behavior
 
     /**
      * Replaces all placeholders in path variable with corresponding values.
+     * @param $path
+     * @return null|string|string[]
      */
     protected function resolvePath($path)
     {
@@ -256,7 +258,7 @@ class UploadBehavior extends Behavior
         $model = $this->owner;
 
         return preg_replace_callback('/{([^}]+)}/', function ($matches) use ($model) {
-            $name      = $matches[1];
+            $name = $matches[1];
             $attribute = ArrayHelper::getValue($model, $name);
             if (is_string($attribute) || is_numeric($attribute)) {
                 return $attribute;
@@ -270,7 +272,7 @@ class UploadBehavior extends Behavior
      * Saves the uploaded file.
      *
      * @param UploadedFile $file the uploaded file instance
-     * @param string       $path the file path used to save the uploaded file
+     * @param string $path the file path used to save the uploaded file
      *
      * @return boolean true whether the file is saved successfully
      */
@@ -282,7 +284,7 @@ class UploadBehavior extends Behavior
     /**
      * Deletes old file.
      *
-     * @param string  $attribute
+     * @param string $attribute
      * @param boolean $old
      */
     protected function delete($attribute, $old = false)

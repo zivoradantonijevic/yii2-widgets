@@ -77,9 +77,10 @@ class ToggleAction extends Action
      * Run the action
      * @param $id integer id of model to be loaded
      *
-     * @throws \yii\web\MethodNotAllowedHttpException
-     * @throws \yii\base\InvalidConfigException
      * @return mixed
+     * @throws InvalidConfigException
+     * @throws MethodNotAllowedHttpException
+     * @throws \yii\base\ExitException
      */
     public function run($id)
     {
@@ -130,7 +131,7 @@ class ToggleAction extends Action
                 Yii::$app->session->setFlash('error', $this->flashError);
             }
         }
-        _p( $model,1);
+
         if (Yii::$app->request->getIsAjax()) {
             Yii::$app->end();
         }

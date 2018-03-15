@@ -12,6 +12,7 @@ use Yii;
 use yii\db\ActiveRecord;
 use yii\grid\DataColumn;
 use yii\helpers\Html;
+use yii\web\View;
 
 //use yii\web\View;
 
@@ -178,7 +179,7 @@ JS;
         //print_r( $model);exit;
 
 
-        $url = [$this->action, 'id' => $model->id];
+        $url = [$this->action, 'id' => $model->primaryKey];
 
         $attribute = $this->attribute;
         $value = $model->$attribute;
