@@ -14,7 +14,7 @@ Add repository details to composer.json
             ....
             {
                 "type": "vcs",
-                "url": "git@github.com:datacondor/cc-yii2.git"
+                "url": "git@github.com:datacondor/yii2-widgets.git"
             },
             ....
         ]
@@ -25,13 +25,13 @@ add to composer.json
         
         "require": {
             .....
-            "carcondor/yii2" : "dev-master",
+            "datacondor/yii2-widgets" : "dev-master",
             .....    
         },
         
 Or 
 
-    php composer.phar require  "carcondor/url" "dev/master"        
+    php composer.phar require  "datacondor/yii2-widgets" "dev/master"        
 
 ## Configuration 
 

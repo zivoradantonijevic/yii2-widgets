@@ -1,5 +1,5 @@
 {
-  "name": "carcondor/yii-2",
+  "name": "datacondor/yii2-widgets",
   "version": "0.0.1",
   "minimum-stability": "stable",
   "require": {
