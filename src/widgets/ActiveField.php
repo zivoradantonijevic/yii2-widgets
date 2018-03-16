@@ -136,14 +136,24 @@ class ActiveField extends \yii\widgets\ActiveField
         $input = Html::activeFileInput($this->model, $this->attribute, $options);
 
         if ($type == 'image') {
-            $previewUrl = $model->getThumbUploadUrl($field, $preview);
-            $fileUrl = $model->getUploadUrl($field);
+            if( $preview === 'original') {
+                $previewUrl = $model->getUploadUrl($field, $preview);
+                $previewHtml = Html::img($previewUrl, $imgOptions);
+            }elseif( $preview == 'file'){
+                $previewHtml = FileType::show($model->getUploadPath($field), $model->getUploadUrl($field));
+            }
+            else{
+                $fileUrl = $model->getUploadUrl($field);
+                $previewUrl = $model->getThumbUploadUrl($field, $preview);
+                $previewHtml = Html::a(Html::img($previewUrl, $imgOptions), $fileUrl, $linkOptions);
+            }
+
+
             if (!$deleteText) {
                 $deleteText = 'Delete Image';
             }
-            $previewHtml = Html::a(Html::img($previewUrl, $imgOptions), $fileUrl, $linkOptions);
         } else {
-            $previewHtml = FileType::show($model->getUploadPath('attachment'), $model->getUploadUrl('attachment'));
+            $previewHtml = FileType::show($model->getUploadPath($field), $model->getUploadUrl($field));
         }
         if (!$deleteText) {
             $deleteText = 'Delete File';
