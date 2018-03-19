@@ -13,7 +13,7 @@ echo "<?php\n";
 ?>
 
 use yii\helpers\Html;
-use backend\widgets\Box;
+use ccyii\widgets\Box;
 
 use <?= $generator->indexWidgetType === 'grid' ? "yii\\grid\\GridView" : "yii\\widgets\\ListView" ?>;
 <?= $generator->enablePjax ? 'use yii\widgets\Pjax;' : '' ?>
