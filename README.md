@@ -47,3 +47,13 @@ This step is optional, you can instantiate required class in place. @todo doc is
 Use it:
 
     Yii::$app->url->doSomething();
+    
+## Gii generator for boxes    
+             'generators' => [
+                'myCrud' => [
+                    'class' => 'ccyii\gii\generators\crud\Generator',
+                    /*'templates' => [
+                        'my' => '@app/myTemplates/crud/default',
+                    ]*/
+                ]
+            ],
