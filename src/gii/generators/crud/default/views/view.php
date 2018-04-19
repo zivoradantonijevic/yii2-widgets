@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'solid'   => false,
         'label'=>\$this->title,
         'actions' => [
-            ['value'=>Html::a('<i class=\"fa fa-plus\"></i> Update', ['update','id'=>\$model->id], ['class' => 'btn btn-success']) ],
+            ['value'=>Html::a('<i class=\"fa fa-edit\"></i> Update', ['update','id'=>\$model->id], ['class' => 'btn btn-success']) ],
             ['value'=>Html::a('<i class=\"fa fa-times\"></i> Delete', ['delete'], [
             'class' => 'btn btn-danger',
             'data' => [

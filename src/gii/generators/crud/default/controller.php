@@ -8,11 +8,12 @@ use yii\helpers\StringHelper;
 
 
 /* @var $this yii\web\View */
-/* @var $generator yii\gii\generators\crud\Generator */
+/* @var $generator \ccyii\gii\generators\crud\Generator */
 
 $controllerClass = StringHelper::basename($generator->controllerClass);
 $modelClass = StringHelper::basename($generator->modelClass);
 $searchModelClass = StringHelper::basename($generator->searchModelClass);
+$tableSchema = $generator->tableSchema;
 if ($modelClass === $searchModelClass) {
     $searchModelAlias = $searchModelClass . 'Search';
 }
@@ -30,6 +31,7 @@ echo "<?php\n";
 namespace <?= StringHelper::dirname(ltrim($generator->controllerClass, '\\')) ?>;
 
 use Yii;
+use yii\helpers\Html;
 use <?= ltrim($generator->modelClass, '\\') ?>;
 <?php if (!empty($generator->searchModelClass)): ?>
 use <?= ltrim($generator->searchModelClass, '\\') . (isset($searchModelAlias) ? " as $searchModelAlias" : "") ?>;
@@ -39,6 +41,7 @@ use yii\data\ActiveDataProvider;
 use <?= ltrim($generator->baseControllerClass, '\\') ?>;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 
 /**
  * <?= $controllerClass ?> implements the CRUD actions for <?= $modelClass ?> model.
@@ -51,6 +54,16 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
     public function behaviors()
     {
         return [
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        //'actions' => ['logout', 'index'],
+                        'allow'   => true,
+                        'roles'   => ['@'],
+                    ],
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -59,6 +72,38 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
             ],
         ];
     }
+
+<?php
+$toggleActions = [];
+foreach ($tableSchema->columns as $column) {
+    $format = $generator->generateColumnFormat($column);
+    $fullClass = trim($generator->modelClass, '\\');
+    if ($format == 'boolean') {
+        $attribute = $column->name;
+        $action = 'toggle-'.$attribute;
+        $toggleActions[] = "
+         '$action' => [
+                'class'           => 'ccyii\widgets\ToggleAction',
+                'attribute' => '$attribute',
+                'modelClass'=> '$fullClass'
+            ]
+";
+    }
+
+}
+
+if( $toggleActions):?>
+        /**
+     * {@inheritdoc}
+     */
+    public function actions()
+    {
+        return [<?=  implode(",",$toggleActions); ?>
+        ];
+    }
+
+<?php endif; ?>
+
 
     /**
      * Lists all <?= $modelClass ?> models.
@@ -93,8 +138,9 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
      */
     public function actionView(<?= $actionParams ?>)
     {
+        $model = $this->findModel(<?= $actionParams ?>);
         return $this->render('view', [
-            'model' => $this->findModel(<?= $actionParams ?>),
+            'model' => $model,
         ]);
     }
 
@@ -108,6 +154,7 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
         $model = new <?= $modelClass ?>();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', '<?= $modelClass ?> Updated. '.Html::a('View',['view','id'=>$model->id]));
             return $this->redirect(['view', <?= $urlParams ?>]);
         }
 
@@ -128,6 +175,7 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
         $model = $this->findModel(<?= $actionParams ?>);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', '<?= $modelClass ?> Updated. '.Html::a('View',['view','id'=>$model->id]));
             return $this->redirect(['view', <?= $urlParams ?>]);
         }
 
@@ -145,7 +193,10 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
      */
     public function actionDelete(<?= $actionParams ?>)
     {
-        $this->findModel(<?= $actionParams ?>)->delete();
+        $model = $this->findModel(<?= $actionParams ?>);
+        $model->delete();
+
+        Yii::$app->session->setFlash('success', '<?= $modelClass ?> Deleted');
 
         return $this->redirect(['index']);
     }
