@@ -4,7 +4,7 @@ use yii\helpers\Inflector;
 use yii\helpers\StringHelper;
 
 /* @var $this yii\web\View */
-/* @var $generator yii\gii\generators\crud\Generator */
+/* @var $generator \ccyii\gii\generators\crud\Generator */
 
 $urlParams = $generator->generateUrlParams();
 $nameAttribute = $generator->getNameAttribute();
@@ -62,10 +62,32 @@ if (($tableSchema = $generator->getTableSchema()) === false) {
 } else {
     foreach ($tableSchema->columns as $column) {
         $format = $generator->generateColumnFormat($column);
+        $attribute = $column->name;
+
+        $columnDefinition = ["\n            [\n",
+            "            'attribute'=>'$attribute',\n"
+            ];
+        if( $format == 'boolean'){
+            $format = 'raw';
+            $class = '\ccyii\widgets\ToggleColumn::className()';
+            $action = 'toggle-'.$attribute;
+            $columnDefinition[] = "            'format'=>'$format', \n";
+            $columnDefinition[] = "            'class'=>$class,\n";
+            $columnDefinition[] = "            'action'=>'$action',\n";
+            $columnDefinition[] = "            'filter'=>[0=>'No',1=>'Yes'],\n";
+
+
+        }else{
+            $columnDefinition[] = "            'format'=>'$format', \n";
+
+        }
+        $columnDefinition[] = "            ],";
+
+        $string = implode('', $columnDefinition);
         if (++$count < 6) {
-            echo "            '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
+            echo $string ."\n";
         } else {
-            echo "            //'" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
+            echo "/* ".$string ."\n*/\n";
         }
     }
 }

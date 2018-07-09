@@ -14,6 +14,7 @@ use yii\db\Schema;
 use yii\gii\CodeFile;
 use yii\helpers\Inflector;
 use yii\helpers\VarDumper;
+use yii\validators\BooleanValidator;
 use yii\web\Controller;
 
 /**
@@ -236,14 +237,15 @@ class Generator extends \yii\gii\Generator
     {
         $tableSchema = $this->getTableSchema();
         if ($tableSchema === false || !isset($tableSchema->columns[$attribute])) {
-            if (preg_match('/^(password|pass|passwd|passcode)$/i', $attribute)) {
+            if ($this->isPassword($attribute)) {
                 return "\$form->field(\$model, '$attribute')->passwordInput()";
             }
 
             return "\$form->field(\$model, '$attribute')";
         }
         $column = $tableSchema->columns[$attribute];
-        if ($column->phpType === 'boolean') {
+
+        if ($this->isBoolean($column)) {
             return "\$form->field(\$model, '$attribute')->checkbox()";
         }
 
@@ -251,7 +253,7 @@ class Generator extends \yii\gii\Generator
             return "\$form->field(\$model, '$attribute')->textarea(['rows' => 6])";
         }
 
-        if (preg_match('/^(password|pass|passwd|passcode)$/i', $column->name)) {
+        if ($this->isPassword($column->name)) {
             $input = 'passwordInput';
         } else {
             $input = 'textInput';
@@ -263,7 +265,7 @@ class Generator extends \yii\gii\Generator
                 $dropDownOptions[$enumValue] = Inflector::humanize($enumValue);
             }
             return "\$form->field(\$model, '$attribute')->dropDownList("
-                . preg_replace("/\n\s*/", ' ', VarDumper::export($dropDownOptions)).", ['prompt' => ''])";
+                . preg_replace("/\n\s*/", ' ', VarDumper::export($dropDownOptions)) . ", ['prompt' => ''])";
         }
 
         if ($column->phpType !== 'string' || $column->size === null) {
@@ -271,6 +273,58 @@ class Generator extends \yii\gii\Generator
         }
 
         return "\$form->field(\$model, '$attribute')->$input(['maxlength' => true])";
+    }
+
+    /**
+     * @param string $attribute
+     * @return bool
+     */
+    public function shallSkipField($attribute)
+    {
+        switch ($attribute) {
+            case 'created_at':
+            case 'updated_at':
+            case 'created_by':
+            case 'updated_by':
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    protected function isPassword($attribute)
+    {
+        return preg_match('/^(password|pass|passwd|passcode)$/i', $attribute);
+    }
+
+    /**
+     * @param yii\db\ColumnSchema $column
+     * @return bool
+     */
+    protected function isBoolean($column)
+    {
+        if ($column->phpType === 'boolean') {
+            return true;
+        }
+        $attribute = $column->name;
+        $class = $this->modelClass;
+        /** @var ActiveRecord $model */
+        $model = new $class;
+        foreach ($model->getActiveValidators($attribute) as $validator) {
+            if (is_a($validator, BooleanValidator::className(), true)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param yii\db\ColumnSchema $column
+     * @return bool
+     */
+    public function isDate($column)
+    {
+        return $column->phpType == 'date' || $column->phpType == 'datetime';
     }
 
     /**
@@ -300,7 +354,11 @@ class Generator extends \yii\gii\Generator
      */
     public function generateColumnFormat($column)
     {
-        if ($column->phpType === 'boolean') {
+        if( $this->isDate($column)){
+            return 'date';
+        }
+
+        if ($this->isBoolean($column)) {
             return 'boolean';
         }
 
@@ -446,7 +504,7 @@ class Generator extends \yii\gii\Generator
                     break;
                 default:
                     $likeKeyword = $this->getClassDbDriverName() === 'pgsql' ? 'ilike' : 'like';
-                    $likeConditions[] = "->andFilterWhere(['{$likeKeyword}', '{$column}', \$this->{$column}])";                    
+                    $likeConditions[] = "->andFilterWhere(['{$likeKeyword}', '{$column}', \$this->{$column}])";
                     break;
             }
         }
